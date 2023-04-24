@@ -21,5 +21,5 @@ Final Staking APR = (Real Staking APR) * (1-Validator’s commission)
 ```bash
 npm i
 
-COSMOS_REST_URL=https://cosmos-testnet.stayking.xyz:1317 npm start
+COSMOS_REST_URL=https://evmos-testnet-api.polkachu.com npm start
 ```

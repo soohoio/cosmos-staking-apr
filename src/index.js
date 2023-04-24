@@ -16,13 +16,13 @@ async function getParams(lcdApi) {
 
   response = await lcdApi.get("/cosmos/distribution/v1beta1/params");
   const communityTax = Number(response.data.params.community_tax); //string
-    console.log({
-        annualProvisions,
-        blocksPerYear,
-        inflation,
-        bondedTokens,
-        communityTax
-    })
+  console.log({
+    annualProvisions,
+    blocksPerYear,
+    inflation,
+    bondedTokens,
+    communityTax
+  })
   return {
     annualProvisions,
     blocksPerYear,
@@ -31,6 +31,39 @@ async function getParams(lcdApi) {
     communityTax
   }
 }
+
+
+async function getEVMOSParams(lcdApi) {
+  let response = await lcdApi.get("/evmos/inflation/v1/epoch_mint_provision");
+
+  const annualProvisions = Number(response.data.epoch_mint_provision.amount * 365);
+  const blocksPerYear =  Number(60*60*24*365/2.12);
+
+  response = await lcdApi.get("/evmos/inflation/v1/inflation_rate");
+  const inflation = Number(response.data.inflation_rate); //string
+
+  response = await lcdApi.get("/cosmos/staking/v1beta1/pool");
+  const bondedTokens = Number(response.data.pool.bonded_tokens); //string
+
+  response = await lcdApi.get("/cosmos/distribution/v1beta1/params");
+  const communityTax = Number(response.data.params.community_tax); //string
+  console.log({
+    annualProvisions,
+    blocksPerYear,
+    inflation,
+    bondedTokens,
+    communityTax
+  })
+  return {
+    annualProvisions,
+    blocksPerYear,
+    inflation,
+    bondedTokens,
+    communityTax
+  }
+}
+
+
 
 function calculateNominalAPR(params) {
   return params.annualProvisions * (1 - params.communityTax) / params.bondedTokens;
@@ -67,7 +100,8 @@ async function start() {
         timeout: 10000,
       });
 
-      const params = await getParams(lcdApi);
+      // const params = await getParams(lcdApi);
+      const params = await getEVMOSParams(lcdApi);
       const blocksYearReal = await getBlocksPerYearReal(lcdApi);
       const nominalAPR = calculateNominalAPR(params);
       const actualAPR = calculateRealAPR(params, nominalAPR, blocksYearReal);
